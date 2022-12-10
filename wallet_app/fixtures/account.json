@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "model": "wallet_app.account",
+    "pk": 1,
+    "fields": {
+      "name": "Nubank",
+      "type": "checking_account",
+      "description": "Conta Corrente"
+    }
+  }
+]

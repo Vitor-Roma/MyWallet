@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load money %}
+{% block title %} Dashboard {% endblock %}
+{% block centertext %} Patrimônio Total: {{ total_value | currency }} {% endblock %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            {% for account in accounts %}
+            <div class="col-lg-3 col-6">
+                <div class="small-box" style="background-color: {{ account.color }}; color: white">
+                    <div class="inner" style="text-align: center">
+                        <h3><i class="fas fa-tag" style="margin-right: 10px"></i>{{ account }}</h3>
+                        <h5><b>{{ account.balance | currency }}</b></h5>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
+                    </div>
+                    <a href="/account/{{account.id}}/{{account.type}}" class="small-box-footer">Detalhes <i
+                            class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row mb-12">
+        <div class="col-md-6 connectedSortable">
+            <div class="container-fluid">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title" style="text-align: center">Patrimônio por conta</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chartjs-size-monitor">
+                            <div class="chartjs-size-monitor-expand">
+                                <div class=""></div>
+                            </div>
+                            <div class="chartjs-size-monitor-shrink">
+                                <div class=""></div>
+                            </div>
+                        </div>
+                        <canvas id="myChart"
+                                style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 736px;"
+                                class="chartjs-render-monitor" width="736" height="250">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 connectedSortable">
+            <div class="container-fluid">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title" style="text-align: center">Patrimônio por conta</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chartjs-size-monitor">
+                            <div class="chartjs-size-monitor-expand">
+                                <div class=""></div>
+                            </div>
+                            <div class="chartjs-size-monitor-shrink">
+                                <div class=""></div>
+                            </div>
+                        </div>
+                        <canvas id="myChart2"
+                                style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 736px;"
+                                class="chartjs-render-monitor" width="736" height="250">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    var labels = []
+    var itemData = []
+    var backGroundColor = []
+    {% for account in accounts %}
+    labels.push("{{ account.name }}")
+    backGroundColor.push("{{ account.color }}")
+    itemData.push(parseFloat("{{ account.balance }}".replace(',','.')))
+    console.log(labels)
+    console.log(itemData)
+    {% endfor %}
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: labels,
+            data: itemData,
+            backgroundColor: backGroundColor,
+        }]
+        };
+    const config = {
+        type: 'pie',
+        data: data
+    }
+    const config2 = {
+        type: 'pie',
+        data: data
+    }
+    
+    const chart = new Chart(document.getElementById('myChart'), config)
+    const chart2 = new Chart(document.getElementById('myChart2'), config2)
+
+
+</script>
+{% endblock %}

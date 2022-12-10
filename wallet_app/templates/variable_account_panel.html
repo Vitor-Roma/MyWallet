@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load money %}
+{% load dict %}
+{% block title %} {{ account.name }} {% endblock %}
+{% block breadcrumb %} {{account.name}}{% endblock %}
+{% block centertext %} Valor investido: {{ account.balance | currency }} | Valor atual: {{ current_value | currency }} {% endblock %}
+{% block content %}
+<!-- Main content -->
+<style>
+.table-head-fixed          { overflow: auto; height: 100px; }
+.table-head-fixed thead th { position: sticky; top: 0; z-index: 1; }
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ account.name }}</h3>
+                    </div>
+                    <div class="card-body table-responsive p-0" style="height: 700px;">
+                        <table class="table table-head-fixed table-hover text-nowrap">
+                            <thead>
+                            <tr>
+                                <th>Ação</th>
+                                <th>Valor Pago</th>
+                                <th>Valor Atual</th>
+                                <th>Saldo</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for share in shares %}
+                            <tr>
+                                <td>{{ share.name }}</td>
+                                <td>{{ paid_value_per_share | dict_key:share.name | currency }}</td>
+                                <td>{{ current_value_per_share | dict_key:share.name | currency }}</td>
+                                <td>{{ 0 | currency }}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                    <div class="card-header">
+                        <h3 class="card-title">{{ account.name }}</h3>
+                    </div>
+                    <div class="card-body table-responsive p-0" style="height: 700px;">
+                        <table class="table table-head-fixed table-hover text-nowrap">
+                            <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Ação</th>
+                                <th>Valor Pago</th>
+                                <th>Número de cotas</th>
+                                <th>Valor Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for transaction in account_transactions %}
+                            <tr>
+                                <td>{{ transaction.paid_date | date:"d/m/Y" }}</td>
+                                <td>{{ transaction.share.name }}</td>
+                                <td>
+                                {% if transaction.amount < 0 %}
+                                <span class="badge bg-danger" style="font-size: 10px">{{ transaction.amount | currency }}</span>
+                                {% else %}
+                                <span class="badge bg-success">{{ transaction.amount | currency }}</span>
+                                {% endif %}
+                                </td>
+                                <td>{{ transaction.number_of_shares}}</td>
+                                <td>{{ transaction.total_value | currency}}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

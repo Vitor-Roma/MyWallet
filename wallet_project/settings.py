@@ -1,7 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
 import os
-import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,7 +9,6 @@ SECRET_KEY = 'django-insecure-5t23mtga=u-u&2%evrejvwi^!+76d01@5c+0ynf^px5hd1t9m7
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-environ.Env.read_env()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -125,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'UTC'
 

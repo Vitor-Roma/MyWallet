@@ -1,9 +1,0 @@
-[
-  {
-    "model": "wallet_app.accounttype",
-    "pk": 1,
-    "fields": {
-      "type": "checking_account"
-    }
-  }
-]
