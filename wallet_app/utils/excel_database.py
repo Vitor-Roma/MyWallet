@@ -1,14 +1,21 @@
+import os
 import pandas as pd
 from pprint import pprint
 from django.shortcuts import get_object_or_404
 from decimal import Decimal
 from wallet_app.models import Account, Saving, MonthlyExpense, Share, VariableInvestment, FixedInvestment
+import boto3
+from botocore.exceptions import ClientError
 
 
 def cc_to_database(datapath, account_name):
     data = pd.read_excel(datapath, sheet_name=account_name)
     json_data = data.to_dict(orient='records')
-    account = get_object_or_404(Account, name=account_name)
+    try:
+        account = get_object_or_404(Account, name=account_name)
+    except:
+        account = Account(name=account_name)
+
     for i in range(data.index.stop):
         date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
         if json_data[i]['Categoria'] == 'Salário':
@@ -42,7 +49,11 @@ def cc_to_database(datapath, account_name):
 def reserva_to_database(datapath, account_name):
     data = pd.read_excel(datapath, sheet_name=account_name)
     json_data = data.to_dict(orient='records')
-    account = get_object_or_404(Account, name=account_name)
+    try:
+        account = get_object_or_404(Account, name=account_name)
+    except:
+        account = Account(name=account_name)
+
     for i in range(data.index.stop):
         date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
         if json_data[i]['Movimentação'] == 'Salário':
@@ -70,14 +81,18 @@ def reserva_to_database(datapath, account_name):
 def variable_to_database(datapath, account_name):
     data = pd.read_excel(datapath, sheet_name=account_name)
     json_data = data.to_dict(orient='records')
-    account = get_object_or_404(Account, name=account_name)
+    try:
+        account = get_object_or_404(Account, name=account_name)
+    except:
+        account = Account(name=account_name)
+
     for i in range(data.index.stop):
         name = json_data[i]['Cota']
         try:
             share = Share.objects.get(name=name)
             share_id = share.id
         except:
-            share = Share.objects.create(name=name)
+            share = Share.objects.create(name=name, type=account_name)
             share_id = share.id
 
         date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
@@ -102,7 +117,11 @@ def variable_to_database(datapath, account_name):
 def fixed_to_database(datapath, account_name):
     data = pd.read_excel(datapath, sheet_name=account_name)
     json_data = data.to_dict(orient='records')
-    account = get_object_or_404(Account, name=account_name)
+    try:
+        account = get_object_or_404(Account, name=account_name)
+    except:
+        account = Account(name=account_name)
+
     for i in range(data.index.stop):
         date = None if pd.isnull(json_data[i]['Aplicação']) else json_data[i]['Aplicação']
         due_date = None if pd.isnull(json_data[i]['Vencimento']) else json_data[i]['Vencimento']
@@ -127,3 +146,12 @@ def fixed_to_database(datapath, account_name):
             me = FixedInvestment(**pandas_dict)
             me.save()
             pprint(f'object saved successfully: {pandas_dict}')
+
+
+def upload_excel(file_path):
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.upload_file(file_path, os.environ.get('AWS_BUCKET_NAME'), 'Tabela_Planilha')
+    except ClientError as e:
+        return False
+    return True

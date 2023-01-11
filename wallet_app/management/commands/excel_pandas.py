@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from wallet_app.utils.excel_database import cc_to_database, reserva_to_database, variable_to_database, fixed_to_database
+from wallet_app.utils.excel_database import cc_to_database, reserva_to_database, variable_to_database, \
+    fixed_to_database, upload_excel
 
 
 class Command(BaseCommand):
@@ -10,3 +11,4 @@ class Command(BaseCommand):
         reserva_to_database(data, 'Reserva de Emergencia')
         variable_to_database(data, 'Fundos Imobiliarios')
         fixed_to_database(data, 'Renda Fixa')
+        upload_excel(data)

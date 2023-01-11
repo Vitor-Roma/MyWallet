@@ -42,7 +42,7 @@
                                 <span class="badge bg-success">{{ transaction.amount | currency }}</span>
                                 {% endif %}
                                 </td>
-                                <td>{{ transaction.projected_value | currency}}</td>
+                                <td> <span class="badge bg-info">{{ transaction.projected_value | currency}}</span></td>
                                 <td>{{ transaction.due_date | date:"d/m/Y" }}</td>
                             </tr>
                             {% endfor %}

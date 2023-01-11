@@ -97,7 +97,7 @@
     {% for account in accounts %}
     labels.push("{{ account.name }}")
     backGroundColor.push("{{ account.color }}")
-    itemData.push(parseFloat("{{ account.balance }}".replace(',','.')))
+    itemData.push(parseFloat("{{ account.balance }}"))
     console.log(labels)
     console.log(itemData)
     {% endfor %}

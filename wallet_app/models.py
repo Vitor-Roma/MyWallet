@@ -41,6 +41,10 @@ class Share(models.Model):
     name = models.CharField('Cota', max_length=100, unique=True, null=False, blank=False)
     description = models.TextField('Descrição', null=True, blank=True)
     current_value = models.DecimalField('Valor atual da cota', null=True, blank=True, max_digits=10, decimal_places=2)
+    type = models.CharField('Tipo de ação', max_length=50, default=None, choices=[
+        ('fiss', 'Fiis'),
+        ('capital_shares', 'Ações'),
+    ])
 
     def __str__(self):
         return self.name
@@ -78,6 +82,10 @@ class VariableInvestment(BaseTransaction):
     @property
     def total_value(self):
         return self.amount * self.number_of_shares
+
+    @property
+    def balance(self):
+        return sum([self.balance - x.current_value for x in self.share_transaction.all()])
 
 
 class MonthlyExpense(BaseTransaction):

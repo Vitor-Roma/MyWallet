@@ -29,7 +29,7 @@ loaddata:
 	docker exec -it my_wallet python3 manage.py loaddata */fixtures/*.json
 database:
 	docker exec -it db_wallet postgres -u -p -e"drop database wallet_db; create database wallet_db;"
-pandas:
-	docker exec my_wallet python3 manage.py excel_pandas
+excel:
+	docker exec -it my_wallet python3 manage.py excel_pandas
 shares:
-	docker exec my_wallet python3 manage.py share_values
+	docker exec -it my_wallet python3 manage.py share_values

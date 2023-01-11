@@ -34,7 +34,7 @@
                                 <td>{{ share.name }}</td>
                                 <td>{{ paid_value_per_share | dict_key:share.name | currency }}</td>
                                 <td>{{ current_value_per_share | dict_key:share.name | currency }}</td>
-                                <td>{{ 0 | currency }}</td>
+                                <td>{{ balance_per_share | dict_key:share.name | currency }}</td>
                             </tr>
                             {% endfor %}
                             </tbody>

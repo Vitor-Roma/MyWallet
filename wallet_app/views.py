@@ -1,5 +1,4 @@
 from django.shortcuts import render
-
 from wallet_app.models import Account, FixedInvestment, Saving, Share, VariableInvestment, MonthlyExpense
 
 
@@ -41,12 +40,14 @@ def account_panel(request, account_id, account_type):
                                                 account.share.name == share.name]) * share.current_value for share in shares}
 
         total_current_value = sum([current_value_per_share[share.name] for share in shares])
+        balance_per_share = {share.name: current_value_per_share[share.name] - paid_value_per_share[share.name] for share in shares}
         data = {
             'account': account,
             'account_transactions': account_transactions,
             'paid_value_per_share': paid_value_per_share,
             'current_value_per_share': current_value_per_share,
             'current_value': total_current_value,
+            'balance_per_share': balance_per_share,
             'shares': shares
         }
         return render(request, 'variable_account_panel.html', data)
