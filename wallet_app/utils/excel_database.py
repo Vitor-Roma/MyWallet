@@ -117,10 +117,7 @@ def variable_to_database(datapath, account_name):
 def fixed_to_database(datapath, account_name):
     data = pd.read_excel(datapath, sheet_name=account_name)
     json_data = data.to_dict(orient='records')
-    try:
-        account = get_object_or_404(Account, name=account_name)
-    except:
-        account = Account(name=account_name)
+    account = get_object_or_404(Account, name=account_name)
 
     for i in range(data.index.stop):
         date = None if pd.isnull(json_data[i]['Aplicação']) else json_data[i]['Aplicação']
@@ -152,6 +149,7 @@ def upload_excel(file_path):
     s3_client = boto3.client('s3')
     try:
         response = s3_client.upload_file(file_path, os.environ.get('AWS_BUCKET_NAME'), 'Tabela_Planilha')
+        print('Planilha atualizada com sucesso!')
     except ClientError as e:
         return False
     return True

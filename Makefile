@@ -33,3 +33,5 @@ excel:
 	docker exec -it my_wallet python3 manage.py excel_pandas
 shares:
 	docker exec -it my_wallet python3 manage.py share_values
+index:
+	docker exec -it my_wallet python3 manage.py index_values

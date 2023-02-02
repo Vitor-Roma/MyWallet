@@ -1,3 +1,5 @@
+from _decimal import Decimal
+
 from django.db import models
 
 
@@ -25,6 +27,10 @@ class Account(models.Model):
         balance = sum([monthlyexpense_sum, fixedinvestment_sum, variableinvestment_sum, saving_sum])
         return balance
 
+    @property
+    def type_balance(self):
+        return sum([account.balance for account in Account.objects.filter(description=self.description)])
+
 
 class BaseTransaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, null=False,
@@ -35,6 +41,10 @@ class BaseTransaction(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def date(self):
+        return f'{self.paid_date.day}/{self.paid_date.month}/{self.paid_date.year}' if self.paid_date else self.paid_date
 
 
 class Share(models.Model):
@@ -58,6 +68,9 @@ class Saving(BaseTransaction):
         ('Other', 'Outro')
     ])
 
+    def __str__(self):
+        return f'{self.date} {self.category} {self.amount}'
+
 
 class FixedInvestment(BaseTransaction):
     projected_value = models.DecimalField('Valor Projetado', null=True, blank=True, max_digits=10, decimal_places=2)
@@ -74,10 +87,21 @@ class FixedInvestment(BaseTransaction):
     obs = models.CharField('Observações', max_length=500, blank=True, null=True)
     link = models.CharField('Link', max_length=200, blank=True, null=True)
 
+    @property
+    def profit(self):
+        try:
+            category = self.category.split()[1]
+            return f'{category} + {round(self.profitability * 100, 2)}%'
+        except:
+            return f'{round(self.profitability * 100, 2)}%'
+
 
 class VariableInvestment(BaseTransaction):
     share = models.ForeignKey(Share, on_delete=models.PROTECT, related_name='share_transaction')
     number_of_shares = models.IntegerField('Número de cotas', default=1, null=False, blank=False)
+
+    def __str__(self):
+        return f'{self.share.name}: R$ {self.amount} / {self.number_of_shares}'
 
     @property
     def total_value(self):
@@ -112,6 +136,7 @@ class MonthlyExpense(BaseTransaction):
         ('pet', 'Pet'),
         ('balance', 'Saldo +/-'),
         ('others', 'Outros'),
+        ('account_transfer', 'Transferência')
     ])
 
     @property
@@ -120,3 +145,12 @@ class MonthlyExpense(BaseTransaction):
 
     def __str__(self):
         return f' {self.date} {self.name} R$: {self.amount}'
+
+
+class Indexes(models.Model):
+    name = models.CharField('Nome', max_length=100, unique=True, blank=False, null=False)
+    value = models.DecimalField('Valor', max_digits=10, decimal_places=2)
+    is_percent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.name} - {self.value}%' if self.is_percent else f'{self.name} - R$ {self.value}'

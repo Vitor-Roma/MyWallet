@@ -1,9 +1,9 @@
-from _decimal import Decimal
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from wallet_app.utils.global_functions import round_percent_string_to_decimal
 
 
 def fiis_value(share_list):
@@ -20,7 +20,7 @@ def fiis_value(share_list):
         element = WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.CLASS_NAME, 'price')))
         price = element.text[3:]
         try:
-            share.current_value = round(Decimal(price.replace(',', '.')), 2)
+            share.current_value = round_percent_string_to_decimal(price)
             share.save()
         except:
-            pass
+            print(f'Erro ao atualizar o valor do fundo: {share.name}')

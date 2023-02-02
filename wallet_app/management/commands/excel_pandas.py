@@ -9,6 +9,7 @@ class Command(BaseCommand):
         data = '/usr/src/app/wallet_app/excel/Tabela planilha.xlm'
         cc_to_database(data, 'Nubank')
         reserva_to_database(data, 'Reserva de Emergencia')
+        reserva_to_database(data, 'Compras')
         variable_to_database(data, 'Fundos Imobiliarios')
         fixed_to_database(data, 'Renda Fixa')
         upload_excel(data)

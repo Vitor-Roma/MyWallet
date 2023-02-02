@@ -2,7 +2,7 @@
 {% load money %}
 {% block title %} {{ account.name }} {% endblock %}
 {% block breadcrumb %} {{account.name}}{% endblock %}
-{% block centertext %} Saldo {{ account.name }}: {{ account.balance | currency }} {% endblock %}
+{% block centertext %} Saldo Previsto: {{ account.balance | currency }} | Saldo Atual {{ actual_balance | currency }} {% endblock %}
 {% block content %}
 <style>
 </style>

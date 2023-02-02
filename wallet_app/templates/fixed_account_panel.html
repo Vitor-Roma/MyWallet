@@ -33,7 +33,7 @@
                             {% for transaction in account_transactions %}
                             <tr>
                                 <td>{{ transaction.paid_date | date:"d/m/Y" }}</td>
-                                <td>{{ transaction.profitability | percent }}</td>
+                                <td>{{ transaction.profit }}</td>
                                 <td>{{ transaction.category }}</td>
                                 <td>
                                 {% if transaction.amount < 0 %}
