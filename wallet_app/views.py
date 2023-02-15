@@ -1,7 +1,6 @@
 import json
 import os
-from datetime import date
-from django.db.models import Count, Sum, F
+from django.db.models import Sum, F
 from django.db.models.functions.datetime import ExtractMonth, ExtractYear
 from dateutil.utils import today
 from django.shortcuts import render
