@@ -38,6 +38,7 @@ class BaseTransaction(models.Model):
                                 related_query_name="%(app_label)s_%(class)ss")
     paid_date = models.DateField("Data do pagamento", null=True, blank=True)
     amount = models.DecimalField('Valor', max_digits=20, decimal_places=2)
+    balance = models.DecimalField('Saldo', null=True, blank=True, max_digits=50, decimal_places=2)
 
     class Meta:
         abstract = True
@@ -114,14 +115,13 @@ class VariableInvestment(BaseTransaction):
 
 class MonthlyExpense(BaseTransaction):
     name = models.CharField('Nome', max_length=200, unique=False, null=False, blank=False)
-    balance = models.DecimalField('Saldo', null=True, blank=True, max_digits=50, decimal_places=2)
     category = models.CharField('Categoria', max_length=100, blank=False, null=False, choices=[
         ('receipts', 'Recebimentos'),
         ('purchases', 'Compras'),
         ('credit_card', 'Cartão'),
         ('yield', 'Rendimentos'),
         ('refund', 'Reembolso'),
-        ('dwelling', 'Moradias'),
+        ('dwelling', 'Moradia'),
         ('pharmacy', 'Farmácia'),
         ('bills', 'Contas'),
         ('grocery', 'Mercado'),
@@ -145,6 +145,20 @@ class MonthlyExpense(BaseTransaction):
 
     def __str__(self):
         return f' {self.date} {self.name} R$: {self.amount}'
+
+    @staticmethod
+    def get_category_choice(category):
+        for choice in MonthlyExpense._meta.get_field('category').choices:
+            if category == choice[0]:
+                return choice[1]
+            if category == choice[1]:
+                return choice[0]
+
+    @staticmethod
+    def is_revenue(category):
+        if category == ('Recebimentos' or 'Rendimentos' or 'Transferência'):
+            return True
+        return False
 
 
 class Indexes(models.Model):

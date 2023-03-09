@@ -24,6 +24,7 @@
                                 <th>Data</th>
                                 <th>Descrição</th>
                                 <th>Valor</th>
+                                <th>Saldo</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -31,9 +32,9 @@
                             <tr>
                                 <td>{{ transaction.paid_date | date:"d/m/Y" }}</td></td>
                                 <td>{{ transaction.category }}</td>
-                                <td>
-                                {% if transaction.category == 'Retirada' %}
-                                    <span class="badge bg-danger" style="font-size: 10px">{{ transaction.amount | currency }}</span>
+                                <td class="value-tag">
+                                {% if transaction.category == 'Resgate' %}
+                                    <span class="badge bg-danger">{{ transaction.amount | currency }}</span>
                                 {% elif transaction.category == 'Rendimentos' %}
                                     <span class="badge bg-warning">{{ transaction.amount | currency }}</span>
                                 {% elif transaction.category == 'Depósito' %}
@@ -42,6 +43,7 @@
                                     <span class="badge bg-info">{{ transaction.amount | currency }}</span>
                                 {% endif %}
                                 </td>
+                                <td>{{ transaction.balance | currency}}</td>
                             </tr>
                             {% endfor %}
                             </tbody>

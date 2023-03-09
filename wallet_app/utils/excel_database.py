@@ -18,14 +18,7 @@ def cc_to_database(datapath, account_name):
 
     for i in range(data.index.stop):
         date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
-        if json_data[i]['Categoria'] == 'Salário':
-            category = 'Recebimentos'
-        elif json_data[i]['Categoria'] == 'Aula':
-            category = 'Estudo'
-        elif pd.isnull(json_data[i]['Categoria']):
-            category = 'Outros'
-        else:
-            category = json_data[i]['Categoria']
+        category = MonthlyExpense.get_category_choice(json_data[i]['Categoria'])
 
         name = 'Não especificado' if pd.isnull(json_data[i]['Lançamento']) else json_data[i]['Lançamento']
         amount = 0 if pd.isnull(json_data[i]['Valor Total']) else json_data[i]['Valor Total']
@@ -64,11 +57,13 @@ def reserva_to_database(datapath, account_name):
             category = json_data[i]['Movimentação']
 
         amount = 0 if pd.isnull(json_data[i]['Valor']) else json_data[i]['Valor']
+        amount = round(Decimal(amount), 2)
         pandas_dict = {
             'account_id': account.id,
             'paid_date': date,
             'category': category,
-            'amount': round(Decimal(amount), 2)
+            'amount': amount,
+            'balance': account.balance + amount,
         }
         try:
             me = Saving.objects.get(category=category, paid_date=date, amount=pandas_dict['amount'])

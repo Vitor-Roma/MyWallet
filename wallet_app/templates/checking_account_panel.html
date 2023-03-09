@@ -9,7 +9,7 @@
 <section class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-12">
+            <div class="col-8">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">{{ account.name }}</h3>
@@ -19,7 +19,7 @@
                             <thead>
                             <tr>
                                 <th>Data</th>
-                                <th>Descrição</th>
+                                <th style="width:100px">Descrição</th>
                                 <th>Categoria</th>
                                 <th>Valor</th>
                                 <th>Saldo</th>
@@ -30,12 +30,20 @@
                             <tr>
                                 <td>{{ transaction.paid_date | date:"d/m/Y" }}</td>
                                 <td>{{ transaction.name }}</td>
-                                <td>{{ transaction.category }}</td>
-                                <td>
-                                {% if transaction.amount < 0 %}
-                                <span class="badge bg-danger" style="font-size: 10px">{{ transaction.amount | currency }}</span>
+                                <td>{{ transaction.get_category_display }}</td>
+                                <td class="value-tag">
+                                {% if transaction.get_category_display == 'Recebimentos' %}
+                                    <span class="badge bg-success">{{ transaction.amount | currency }}</span>
+                                {% elif transaction.get_category_display == 'Transferência' %}
+                                    <span class="badge bg-info">{{ transaction.amount | currency }}</span>
+                                {% elif transaction.get_category_display == 'Rendimentos' %}
+                                    <span class="badge bg-warning">{{ transaction.amount | currency }}</span>
+                                {% elif transaction.get_category_display == 'Mãe' %}
+                                    <span class="badge bg-secondary">{{ transaction.amount | currency }}</span>
+                                {% elif transaction.get_category_display == 'Outros' %}
+                                    <span class="badge bg-dark">{{ transaction.amount | currency }}</span>
                                 {% else %}
-                                <span class="badge bg-success">{{ transaction.amount | currency }}</span>
+                                 <span class="badge bg-danger">{{ transaction.amount | currency }}</span>
                                 {% endif %}
                                 </td>
                                 <td>{{ transaction.balance | currency}}</td>
@@ -45,6 +53,22 @@
                         </table>
                     </div>
                 </div>
+            </div>
+            <div class="col-4">
+                <table class="">
+                    {% for amount in monthly_control %}
+                        {% if amount.date.month == selected_date.month and amount.date.year == selected_date.year %}
+                            {% for category in amount.expense_list %}
+                                {% for key, value in category.items %}
+                                    <tr>{{ key }}: </tr>
+                                    <tr>{{ value }}</tr>
+                                    <br>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    <tr>Total: {{ total_per_month }}</tr>
+                </table>
             </div>
         </div>
     </div>
