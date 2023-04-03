@@ -1,16 +1,23 @@
-import datetime
+from datetime import date
 import json
 import os
-
 import pandas as pd
+from django.db import transaction
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
 from django.db.models.functions.datetime import ExtractMonth, ExtractYear
 from dateutil.utils import today
-from django.shortcuts import render
-from wallet_app.models import Account, FixedInvestment, Saving, Share, VariableInvestment, MonthlyExpense, Indexes
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Q
+from django.urls import reverse
+
+from wallet_app.models import Account, FixedInvestment, Saving, Share, VariableInvestment, MonthlyExpense, Indexes, \
+    BuyingList
+from random import randint
 
 
+@login_required
 def home(request):
     accounts = Account.objects.all().order_by('pk')
     total_value = sum([account.balance for account in accounts])
@@ -26,52 +33,75 @@ def home(request):
     return render(request, 'home.html', data)
 
 
-def account_panel(request, account_id, account_type):
+@login_required()
+def account_panel(request, account_id):
     account = Account.objects.get(pk=account_id)
     if account.type == 'checking_account':
+        buying_account = Account.objects.get(name='Compras')
+        buying_list = BuyingList.objects.all()
+        start_date = request.GET.get('start_date', (date.today().replace(day=1) - relativedelta(months=6)).strftime("%Y-%m-%d"))
+        end_date = request.GET.get('end_date', (date.today().replace(day=1) + relativedelta(months=1) - relativedelta(days=1)).strftime("%Y-%m-%d"))
+        category_filter = request.GET.get('category', None)
         actual_balance = sum([x.amount for x in account.wallet_app_monthlyexpense_related.all() if x.paid_date <= today().date()])
-        account_transactions = MonthlyExpense.objects.filter(account_id=account_id).order_by('-paid_date', '-pk')
-        category_monthly_amount = MonthlyExpense.objects\
-            .filter(account_id=account_id)\
+        account_transactions = MonthlyExpense.objects.filter(Q(account_id=account_id, paid_date__gte=start_date, paid_date__lte=end_date)).order_by('-paid_date', '-pk')
+        if category_filter:
+            account_transactions = account_transactions.filter(category=MonthlyExpense.get_category_choice(category_filter))
+        category_monthly_amount = account_transactions\
             .annotate(month=ExtractMonth('paid_date'), year=ExtractYear('paid_date'), q_category=F('category'))\
             .values('month', 'year', 'q_category')\
             .order_by('year', 'month')\
             .annotate(total=Sum('amount'))\
             .values('month', 'year', 'q_category', 'total')
 
-        selected_date = today() - relativedelta(months=1)
-        first_date_month, last_date_month = category_monthly_amount.first()['month'], category_monthly_amount.last()['month']
-        first_date_year, last_date_year = category_monthly_amount.first()['year'], category_monthly_amount.last()['year']
-        fist_date, last_date = datetime.datetime(first_date_year, first_date_month, day=1), datetime.datetime(last_date_year, last_date_month, day=1)
-        date_range = pd.date_range(fist_date, last_date, freq='MS').to_pydatetime()
+        date_range = pd.date_range(start_date, end_date, freq='MS').date
 
         monthly_control = []
+        salary = json.loads(os.environ.get('SALARY').replace("'", '"'))
         for current_date in date_range:
-            current_month_control = {'date': current_date, 'expense_list': [], 'revenue_list': []}
+            current_month_control = {'date': current_date, 'expense_list': [], 'receipt_list': [], 'goal': salary['Despesas_Mensais']}
             for category in category_monthly_amount:
                 q_category = MonthlyExpense.get_category_choice(category['q_category'])
                 if category['month'] == current_date.month and category['year'] == current_date.year:
-                    if MonthlyExpense.is_revenue(q_category):
-                        current_month_control['revenue_list'].append({q_category: category['total']})
-                    else:
+                    if MonthlyExpense.nature(q_category) == 'receipt':
+                        current_month_control['receipt_list'].append({q_category: category['total']})
+                    elif MonthlyExpense.nature(q_category) == 'expense':
                         current_month_control['expense_list'].append({q_category: category['total']})
-            current_month_control.update({'total_expense': sum([list(x.values())[0] for x in current_month_control['expense_list']])})
-            current_month_control.update({'total_revenue': sum([list(x.values())[0] for x in current_month_control['revenue_list']])})
-            if current_month_control['expense_list'] or current_month_control['revenue_list']:
+            current_month_control.update({'total_expense': abs(sum([list(x.values())[0] for x in current_month_control['expense_list']]))})
+            current_month_control.update({'total_revenue': abs(sum([list(x.values())[0] for x in current_month_control['receipt_list']]))})
+            if current_month_control['expense_list'] or current_month_control['receipt_list']:
                 monthly_control.append(current_month_control)
 
-        total_per_month = sum([amount['total'] for amount in category_monthly_amount if amount['month'] == selected_date.month and amount['year'] == selected_date.year])
+        pie_chart_labels = []
+        pie_chart_data = []
+        pie_chart_color = []
+        for category in [choice[0] for choice in MonthlyExpense.category.field.choices]:
+            _category = MonthlyExpense.get_category_choice(category)
+            if MonthlyExpense.nature(_category) == 'expense':
+                _sum = abs(sum([monthly_amount['total'] for monthly_amount in category_monthly_amount if monthly_amount['q_category'] == category]))
+                _category = MonthlyExpense.get_category_choice(category)
+                pie_chart_labels.append(_category)
+                pie_chart_data.append(_sum)
+                pie_chart_color.append(f'rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})')
+
+        # import ipdb;ipdb.set_trace()
         data = {
             'account': account,
             'account_transactions': account_transactions,
             'actual_balance': actual_balance,
+            'start_date': start_date,
+            'end_date': end_date,
             'monthly_control': monthly_control,
-            'selected_date': selected_date,
-            'total_per_month': total_per_month,
+            'categories': [choice[1] for choice in MonthlyExpense.category.field.choices],
+            'category_filter': category_filter,
+            'pie_chart_labels': pie_chart_labels,
+            'pie_chart_data': pie_chart_data,
+            'pie_chart_color': pie_chart_color,
+            'buying_account': buying_account,
+            'buying_list': buying_list,
         }
         return render(request, 'checking_account_panel.html', data)
 
-    elif account_type == 'fixed_investment_account':
+    elif account.type == 'fixed_investment_account':
         account_transactions = FixedInvestment.objects.filter(account_id=account_id).order_by('-paid_date', '-pk')
         data = {
             'account': account,
@@ -79,7 +109,7 @@ def account_panel(request, account_id, account_type):
         }
         return render(request, 'fixed_account_panel.html', data)
 
-    elif account_type == 'variable_investment_account':
+    elif account.type == 'variable_investment_account':
         account_transactions = VariableInvestment.objects.filter(account_id=account_id).order_by('-paid_date', '-pk')
         shares = Share.objects.all()
         paid_value_per_share = {share.name: sum(
@@ -102,10 +132,50 @@ def account_panel(request, account_id, account_type):
         }
         return render(request, 'variable_account_panel.html', data)
 
-    elif account_type == 'saving_account':
+    elif account.type == 'saving_account':
         account_transactions = Saving.objects.filter(account_id=account_id).order_by('-paid_date', '-pk')
         data = {
             'account': account,
             'account_transactions': account_transactions
         }
         return render(request, 'saving_account_panel.html', data)
+
+
+@login_required
+def add_buying_list(request, account_id):
+    description = request.GET.get('item_description')
+    min_price = request.GET.get('item_min_price')
+    max_price = request.GET.get('item_max_price')
+    qty = request.GET.get('quantity')
+    try:
+        with transaction.atomic():
+            for x in qty:
+                BuyingList.objects.create(description=description, min_price=min_price, max_price=max_price)
+    except:
+        pass
+    return redirect(reverse('account_panel', kwargs={'account_id': account_id}))
+
+
+@login_required
+def edit_buying_list(request, account_id, item_id):
+    item = get_object_or_404(BuyingList, pk=item_id)
+    try:
+        with transaction.atomic():
+            item.description = request.GET.get('item_description')
+            item.min_price = request.GET.get('item_min_price')
+            item.max_price = request.GET.get('item_max_price')
+            item.save()
+    except:
+        pass
+    return redirect(reverse('account_panel', kwargs={'account_id': account_id}))
+
+
+@login_required
+def delete_buying_list(request, account_id, item_id):
+    item = get_object_or_404(BuyingList, pk=item_id)
+    try:
+        item.delete()
+        print('era pra dar certo')
+    except Exception:
+        print(Exception)
+    return redirect(reverse('account_panel', kwargs={'account_id': account_id}))

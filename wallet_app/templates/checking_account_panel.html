@@ -2,24 +2,113 @@
 {% load money %}
 {% block title %} {{ account.name }} {% endblock %}
 {% block breadcrumb %} {{account.name}}{% endblock %}
-{% block centertext %} Saldo Previsto: {{ account.balance | currency }} | Saldo Atual {{ actual_balance | currency }} {% endblock %}
 {% block content %}
 <style>
+    .custom-small-box {
+      background-color: transparent;
+      border: 3px solid #6699ff;
+      color: #6699ff;
+      border-radius: 50px;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      text-decoration: none;
+    }
+
+    .custom-small-box:hover {
+        border: 3px solid #007bff;
+        color: #007bff;
+    }
+
+
 </style>
-<section class="content">
+<section class="content" style="background: linear-gradient(135deg, #8A05BE, #FF6C7D)">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-8">
+            <div class="col-md-12">
+                <br>
+            </div>
+            <div class="col-md-2">
+                <div class="card" style="text-align: center; ">
+                    <div class="card-body" style="height: 450px">
+                        <h2>
+                            Saldo Atual:
+                        </h2>
+                        <p>
+                            <span class="money">
+                                {{ actual_balance | currency }}
+                            </span>
+                        </p>
+                        <h3>
+                            Saldo Previsto:
+                        </h3>
+                        <p>
+                            <span class="money-2">
+                                {{ account.balance | currency }}
+                            </span>
+                        </p>
+                        <h3>
+                            Saldo Compras:
+                        </h3>
+                        <p>
+                            <span class="money-3">
+                                {{ buying_account.balance | currency }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ account.name }}</h3>
+                        <div class="card-tools">
+                            <div class="custom-small-box">
+                                <a href="{% url 'add_buying_list' account.id %}" style="padding: 5px 10px;">
+                                    + Adicionar novo item
+                                </a>
+                            </div>
+                        </div>
+                        <h3>
+                            Lista de coisas a comprar
+                        </h3>
                     </div>
-                    <div class="card-body table-responsive p-0" style="height: 700px;">
-                        <table class="table table-head-fixed table-hover text-nowrap">
+                    <div class="card-body table-responsive p-0" style="height: 380px;">
+                        <table class="table table-hover">
+                            <tbody>
+                            {% for item in buying_list %}
+                                {% if buying_account.balance < item.min_price %}
+                                    <tr class="table-danger" title="Não tem o suficiente nem para comprar o mais barato">
+                                {% elif item.min_price < buying_account.balance and buying_account.balance < item.max_price %}
+                                    <tr class="table-warning" title="Pode acabar usando todo o valor guardado">
+                                {% else %}
+                                    <tr class="table-success" title="Mesmo comprando o mais caro, ainda vai sobrar">
+                                {% endif %}
+                                    <td>{{ item.description }}</td>
+                                    <td>{{ item.min_price | currency }} ~ {{ item.max_price | currency }}</td>
+                                    <td>
+                                        <a href="{% url 'edit_buying_list' account.id item.id %}">
+                                            <i class="fas fa-edit btn-edit"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'delete_buying_list' account.id item.id %}">
+                                            <i class="fas fa-trash btn-delete"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body table-responsive p-0" style="height: 450px;">
+                        <table class="table">
                             <thead>
                             <tr>
-                                <th>Data</th>
-                                <th style="width:100px">Descrição</th>
+                                <th>Transação</th>
                                 <th>Categoria</th>
                                 <th>Valor</th>
                                 <th>Saldo</th>
@@ -28,25 +117,34 @@
                             <tbody>
                             {% for transaction in account_transactions %}
                             <tr>
-                                <td>{{ transaction.paid_date | date:"d/m/Y" }}</td>
-                                <td>{{ transaction.name }}</td>
+                                <td>
+                                    {{ transaction.paid_date | date:"d/m/Y" }}
+                                    <br>
+                                    <p>
+                                        {{ transaction.name}}
+                                    </p>
+                                </td>
                                 <td>{{ transaction.get_category_display }}</td>
                                 <td class="value-tag">
-                                {% if transaction.get_category_display == 'Recebimentos' %}
+                                    {% if transaction.get_category_display == 'Recebimentos' %}
                                     <span class="badge bg-success">{{ transaction.amount | currency }}</span>
-                                {% elif transaction.get_category_display == 'Transferência' %}
+                                    {% elif transaction.get_category_display == 'Transferência' %}
                                     <span class="badge bg-info">{{ transaction.amount | currency }}</span>
-                                {% elif transaction.get_category_display == 'Rendimentos' %}
+                                    {% elif transaction.get_category_display == 'Rendimentos' %}
                                     <span class="badge bg-warning">{{ transaction.amount | currency }}</span>
-                                {% elif transaction.get_category_display == 'Mãe' %}
+                                    {% elif transaction.get_category_display == 'Mãe' %}
                                     <span class="badge bg-secondary">{{ transaction.amount | currency }}</span>
-                                {% elif transaction.get_category_display == 'Outros' %}
+                                    {% elif transaction.get_category_display == 'Outros' %}
                                     <span class="badge bg-dark">{{ transaction.amount | currency }}</span>
-                                {% else %}
-                                 <span class="badge bg-danger">{{ transaction.amount | currency }}</span>
-                                {% endif %}
+                                    {% else %}
+                                    <span class="badge bg-danger">{{ transaction.amount | currency }}</span>
+                                    {% endif %}
                                 </td>
-                                <td>{{ transaction.balance | currency}}</td>
+                                {% if transaction.balance >= 0 %}
+                                <td style="width:120px">{{ transaction.balance | currency}}</td>
+                                {% else %}
+                                <td style="width:120px; color:red">{{ transaction.balance | currency}}</td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                             </tbody>
@@ -54,23 +152,189 @@
                     </div>
                 </div>
             </div>
-            <div class="col-4">
-                <table class="">
-                    {% for amount in monthly_control %}
-                        {% if amount.date.month == selected_date.month and amount.date.year == selected_date.year %}
-                            {% for category in amount.expense_list %}
-                                {% for key, value in category.items %}
-                                    <tr>{{ key }}: </tr>
-                                    <tr>{{ value }}</tr>
-                                    <br>
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                    <tr>Total: {{ total_per_month }}</tr>
-                </table>
+            <div class="col-md-8">
+                <div class="card card-info">
+                    <div class="card-header" style="height: 150px;">
+                        <div class="card-tools">
+                            <a href="/account/{{account.id}}/">limpar filtros</a>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="form-group form-inline">
+                            <form method="GET">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label style="margin-left: 25px; display: inline-block;">Início:</label>
+                                        <input class="form-control" name="start_date" type="date"
+                                               value="{{ start_date }}" style="width: 150px;  margin-left: 25px;">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label style="margin-left: 25px; display: inline-block">Fim:</label>
+                                        <input class="form-control" name="end_date" type="date" value="{{ end_date }}"
+                                               style="width: 150px; margin-left: 25px;">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label style="margin-left: 25px; display: inline-block">Categoria:</label>
+                                        <select class="form-control" style="width: 150px;  margin-left: 25px;"
+                                                name="category">
+                                            <option value="" selected="">---------------</option>
+                                            {% for category in categories %}
+                                            <option {% if category == category_filter %} selected="selected" {% endif %}
+                                                    value="{{ category }}">{{ category }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <p>
+                                        <button class="btn btn-custom-submit">Filtrar</button>
+                                    </p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body " style="display: block; height: 350px;">
+                        <canvas id="myChart"
+                                style="min-height: 50px; height: 50px; max-height: 250px; display: block;"
+                                class="chartjs-render-monitor">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title" style="text-align: center">Despesas por categoria</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chartjs-size-monitor">
+                            <div class="chartjs-size-monitor-expand">
+                                <div class=""></div>
+                            </div>
+                            <div class="chartjs-size-monitor-shrink">
+                                <div class=""></div>
+                            </div>
+                        </div>
+                        <canvas id="myChart2"
+                                style="min-height: 250px; height: 250px; max-height: 400px; max-width: 100%; display: block; width: 736px;"
+                                class="chartjs-render-monitor" width="736" height="250">
+                        </canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    var labels = []
+    var labels2 = []
+    var itemData = []
+    var itemData2 = []
+    var itemData3 = []
+    var itemData4 = []
+    var backgroundColor = []
+    {% for month in monthly_control %}
+        labels.push('{{ month.date |date:"m/Y" }}')
+        itemData.push(parseFloat('{{ month.total_expense }}'))
+        itemData2.push(parseFloat('{{ month.total_revenue }}'))
+        itemData3.push(parseFloat('{{ month.goal }}'))
+    {% endfor %}
+    {% for label in pie_chart_labels %}
+        labels2.push('{{label}}')
+    {% endfor%}
+    {% for data in pie_chart_data %}
+        itemData4.push(parseFloat('{{ data }}'))
+    {% endfor %}
+    {% for color in pie_chart_color %}
+        backgroundColor.push('{{ color }}')
+    {% endfor %}
+
+    const data = {
+        labels: labels,
+        datasets: [
+            {
+                label: "Despesas",
+                data: itemData,
+                fill: false,
+                backgroundColor: 'red',
+                tension: 0.1
+            },
+            {
+                label: "Teto de despesas",
+                data: itemData3,
+                fill: false,
+                backgroundColor: 'blue',
+                tension: 0.1
+            },
+            {
+                label: "Receitas",
+                data: itemData2,
+                fill: false,
+                backgroundColor: 'green',
+                tension: 0.1
+            },
+        ]
+    };
+
+    const data2 = {
+        labels: labels2,
+        datasets: [{
+            label: labels2,
+            data: itemData4,
+            backgroundColor: backgroundColor
+        }]
+    };
+
+    var chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      legend: {
+        display: false
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }],
+        xAxes: [{
+          barThickness: 20,
+          maxBarThickness: 30,
+          ticks: {
+            fontSize: 14
+          },
+          gridLines: {
+            display: false
+          }
+        }]
+      },
+    };
+
+    const config = {
+        type: 'bar',
+        data: data,
+        options: chartOptions
+    }
+    const config2 = {
+        type: 'pie',
+        data: data2
+    }
+
+    const chart = new Chart(document.getElementById('myChart'), config)
+    const chart2 = new Chart(document.getElementById('myChart2'), config2)
+
+</script>
 {% endblock %}

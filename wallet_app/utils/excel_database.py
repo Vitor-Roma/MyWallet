@@ -17,9 +17,8 @@ def cc_to_database(datapath, account_name):
         account = Account(name=account_name)
 
     for i in range(data.index.stop):
-        date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
+        date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data'].date()
         category = MonthlyExpense.get_category_choice(json_data[i]['Categoria'])
-
         name = 'Não especificado' if pd.isnull(json_data[i]['Lançamento']) else json_data[i]['Lançamento']
         amount = 0 if pd.isnull(json_data[i]['Valor Total']) else json_data[i]['Valor Total']
         amount = round(Decimal(amount), 2)
@@ -48,7 +47,7 @@ def reserva_to_database(datapath, account_name):
         account = Account(name=account_name)
 
     for i in range(data.index.stop):
-        date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
+        date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data'].date()
         if json_data[i]['Movimentação'] == 'Salário':
             category = 'Depósito'
         elif json_data[i]['Movimentação'] == 'Empréstimo':
@@ -90,7 +89,7 @@ def variable_to_database(datapath, account_name):
             share = Share.objects.create(name=name, type=account_name)
             share_id = share.id
 
-        date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data']
+        date = None if pd.isnull(json_data[i]['Data']) else json_data[i]['Data'].date()
         amount = 0 if pd.isnull(json_data[i]['Valor']) else json_data[i]['Valor']
         quantity = 0 if pd.isnull(json_data[i]['Número de Cotas']) else json_data[i]['Número de Cotas']
         pandas_dict = {
@@ -115,8 +114,8 @@ def fixed_to_database(datapath, account_name):
     account = get_object_or_404(Account, name=account_name)
 
     for i in range(data.index.stop):
-        date = None if pd.isnull(json_data[i]['Aplicação']) else json_data[i]['Aplicação']
-        due_date = None if pd.isnull(json_data[i]['Vencimento']) else json_data[i]['Vencimento']
+        date = None if pd.isnull(json_data[i]['Aplicação']) else json_data[i]['Aplicação'].date()
+        due_date = None if pd.isnull(json_data[i]['Vencimento']) else json_data[i]['Vencimento'].date()
         amount = 0 if pd.isnull(json_data[i]['Valor Inicial']) else json_data[i]['Valor Inicial']
         projected_value = 0 if pd.isnull(json_data[i]['Valor Projetado']) else json_data[i]['Valor Projetado']
         profitability = 0 if pd.isnull(json_data[i]['Rentabilidade']) else json_data[i]['Rentabilidade']

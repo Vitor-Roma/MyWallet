@@ -146,7 +146,6 @@ class MonthlyExpense(BaseTransaction):
     def __str__(self):
         return f' {self.date} {self.name} R$: {self.amount}'
 
-    @staticmethod
     def get_category_choice(category):
         for choice in MonthlyExpense._meta.get_field('category').choices:
             if category == choice[0]:
@@ -154,11 +153,11 @@ class MonthlyExpense(BaseTransaction):
             if category == choice[1]:
                 return choice[0]
 
-    @staticmethod
-    def is_revenue(category):
-        if category == ('Recebimentos' or 'Rendimentos' or 'Transferência'):
-            return True
-        return False
+    def nature(category):
+        if category in ['Recebimentos', 'Rendimentos', 'Reembolso']:
+            return 'receipt'
+        if category != 'Transferência':
+            return 'expense'
 
 
 class Indexes(models.Model):
@@ -168,3 +167,12 @@ class Indexes(models.Model):
 
     def __str__(self):
         return f'{self.name} - {self.value}%' if self.is_percent else f'{self.name} - R$ {self.value}'
+
+
+class BuyingList(models.Model):
+    description = models.CharField("Descrição", max_length=200, blank=False, null=False)
+    min_price = models.DecimalField('Valor Mínimo', max_digits=10, decimal_places=2)
+    max_price = models.DecimalField('Valor Máximo', max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.description} R${self.min_price} ~ R${self.max_price}'
