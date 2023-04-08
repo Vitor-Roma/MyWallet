@@ -1,0 +1,44 @@
+<div class="modal fade" id="create-buying-list" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{% url 'add_buying_list' account.id %}" method="post" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p class="login-box-msg">Adicionar item a lista de coisas a fazer</p>
+                    {% csrf_token %}
+                    <label>Descrição:</label>
+                    <input type="text" class="form-control" name="item" placeholder="Descrição">
+                    <label>Preço Mínimo:</label>
+                    <input type="number" class="form-control" name="min_price" placeholder="0">
+                    <label>Preço Máximo:</label>
+                    <input type="number" class="form-control" name="max_price" placeholder="0">
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" class="btn hike-color">Salvar</button>
+                    <a class="btn btn-danger" data-dismiss="modal">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="edit-buying-list-{{ item.id }}" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{% url 'edit_buying_list' account.id item.id %}" method="post" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p class="login-box-msg">Adicionar item a lista de coisas a fazer</p>
+                    {% csrf_token %}
+                    <label>Descrição:</label>
+                    <input type="text" class="form-control" name="description" placeholder="Descrição" value="{{  item.description }}">
+                    <label>Preço Mínimo:</label>
+                    <input type="number" class="form-control" name="min_price" value="{{ item.min_price }}">
+                    <label>Preço Máximo:</label>
+                    <input type="number" class="form-control" name="max_price" value="{{ item.max_price }}">
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" class="btn hike-color">Salvar</button>
+                    <a class="btn btn-danger" data-dismiss="modal">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

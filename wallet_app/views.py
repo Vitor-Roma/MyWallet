@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.urls import reverse
 
 from wallet_app.models import Account, FixedInvestment, Saving, Share, VariableInvestment, MonthlyExpense, Indexes, \
-    BuyingList
+    BuyingList, IncomeDistribution, ToDoList
 from random import randint
 
 
@@ -21,14 +21,19 @@ from random import randint
 def home(request):
     accounts = Account.objects.all().order_by('pk')
     total_value = sum([account.balance for account in accounts])
-    salary = json.loads(os.environ.get('SALARY').replace("'", '"'))
-    salary['Total'] = sum(salary.values())
+    salary = IncomeDistribution.objects.all()
+    total_salary = sum([values.amount for values in salary])
     indexes = Indexes.objects.all().order_by('value')
+    todo_list = ToDoList.objects.all().order_by('date')
+    todo_list_categories = ToDoList.category.field.choices
     data = {
         'accounts': accounts,
         'total_value': total_value,
         'salary': salary,
         'indexes': indexes,
+        'total_salary': total_salary,
+        'todo_list': todo_list,
+        'todo_list_categories': todo_list_categories,
     }
     return render(request, 'home.html', data)
 
@@ -56,9 +61,10 @@ def account_panel(request, account_id):
         date_range = pd.date_range(start_date, end_date, freq='MS').date
 
         monthly_control = []
-        salary = json.loads(os.environ.get('SALARY').replace("'", '"'))
+        salary = IncomeDistribution.objects.get(distribution='Despesas Mensais')
         for current_date in date_range:
-            current_month_control = {'date': current_date, 'expense_list': [], 'receipt_list': [], 'goal': salary['Despesas_Mensais']}
+            goal = salary.amount if not category_filter else 0
+            current_month_control = {'date': current_date, 'expense_list': [], 'receipt_list': [], 'goal': goal}
             for category in category_monthly_amount:
                 q_category = MonthlyExpense.get_category_choice(category['q_category'])
                 if category['month'] == current_date.month and category['year'] == current_date.year:
@@ -83,7 +89,6 @@ def account_panel(request, account_id):
                 pie_chart_data.append(_sum)
                 pie_chart_color.append(f'rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})')
 
-        # import ipdb;ipdb.set_trace()
         data = {
             'account': account,
             'account_transactions': account_transactions,
@@ -179,3 +184,30 @@ def delete_buying_list(request, account_id, item_id):
     except Exception:
         print(Exception)
     return redirect(reverse('account_panel', kwargs={'account_id': account_id}))
+
+
+@login_required
+def add_todo_list(request):
+    item = request.POST.get('item')
+    _date = request.POST.get('date')
+    category = request.POST.get('category')
+    ToDoList.objects.create(item=item, date=_date, category=category)
+    return redirect(reverse('home'))
+
+
+@login_required
+def delete_todo_list(request, item_id):
+    item = ToDoList.objects.get(pk=item_id)
+    item.delete()
+    return redirect(reverse('home'))
+
+
+@login_required
+def edit_todo_list(request, item_id):
+    item = ToDoList.objects.get(pk=item_id)
+    item.item = request.POST.get('item')
+    item.date = request.POST.get('date')
+    item.category = request.POST.get('category')
+    item.priority = request.POST.get('priority')
+    item.save()
+    return redirect(reverse('home'))

@@ -1,5 +1,3 @@
-from _decimal import Decimal
-
 from django.db import models
 
 
@@ -147,7 +145,7 @@ class MonthlyExpense(BaseTransaction):
         return f' {self.date} {self.name} R$: {self.amount}'
 
     def get_category_choice(category):
-        for choice in MonthlyExpense._meta.get_field('category').choices:
+        for choice in MonthlyExpense.category.field.choices:
             if category == choice[0]:
                 return choice[1]
             if category == choice[1]:
@@ -176,3 +174,42 @@ class BuyingList(models.Model):
 
     def __str__(self):
         return f'{self.description} R${self.min_price} ~ R${self.max_price}'
+
+
+class ToDoList(models.Model):
+    item = models.CharField('Item', max_length=150, blank=False, null=False)
+    date = models.DateField('Data', null=True, blank=True)
+    priority = models.IntegerField('Nível de prioridade', null=False, blank=False, default=1, choices=[
+        ('1', 1),
+        ('2', 2),
+        ('3', 3),
+        ('4', 4),
+        ('5', 5),
+    ])
+    category = models.CharField('Categoria', max_length=150, blank=False, null=False, choices=[
+        ('work', 'Trabalho'),
+        ('study', 'Estudo'),
+        ('personal', 'Pessoal'),
+        ('home', 'Casa'),
+        ('health', 'Saúde'),
+        ('others', 'Outros'),
+    ])
+
+    def __str__(self):
+        return f'{self.item} | {self.category}'
+
+
+class Income(models.Model):
+    source = models.CharField('Fonte da renda', max_length=100, blank=False, null=False)
+    amount = models.DecimalField('Valor da renda', max_digits=10, decimal_places=2, blank=False, null=False)
+
+    def __str__(self):
+        return f'{self.source}: R$ {self.amount}'
+
+
+class IncomeDistribution(models.Model):
+    distribution = models.CharField("Distribuição da renda", max_length=100, blank=False, null=False)
+    amount = models.DecimalField('Valor distribuido', max_digits=10, decimal_places=2, blank=False, null=False)
+
+    def __str__(self):
+        return f'{self.distribution}: R$ {self.amount}'
