@@ -24,8 +24,10 @@ def home(request):
     salary = IncomeDistribution.objects.all()
     total_salary = sum([values.amount for values in salary])
     indexes = Indexes.objects.all().order_by('value')
-    todo_list = ToDoList.objects.all().order_by('date')
+    todo_list = ToDoList.objects.all().order_by('-priority', '-pk')
     todo_list_categories = ToDoList.category.field.choices
+    todo_list_priorities = ToDoList.priority.field.choices
+    _today = date.today()
     data = {
         'accounts': accounts,
         'total_value': total_value,
@@ -34,6 +36,8 @@ def home(request):
         'total_salary': total_salary,
         'todo_list': todo_list,
         'todo_list_categories': todo_list_categories,
+        'todo_list_priorities': todo_list_priorities,
+        'today': _today,
     }
     return render(request, 'home.html', data)
 
@@ -178,20 +182,16 @@ def edit_buying_list(request, account_id, item_id):
 @login_required
 def delete_buying_list(request, account_id, item_id):
     item = get_object_or_404(BuyingList, pk=item_id)
-    try:
-        item.delete()
-        print('era pra dar certo')
-    except Exception:
-        print(Exception)
+    item.delete()
     return redirect(reverse('account_panel', kwargs={'account_id': account_id}))
 
 
 @login_required
 def add_todo_list(request):
     item = request.POST.get('item')
-    _date = request.POST.get('date')
     category = request.POST.get('category')
-    ToDoList.objects.create(item=item, date=_date, category=category)
+    priority = request.POST.get('priority')
+    ToDoList.objects.create(item=item, category=category, priority=priority)
     return redirect(reverse('home'))
 
 
@@ -206,7 +206,6 @@ def delete_todo_list(request, item_id):
 def edit_todo_list(request, item_id):
     item = ToDoList.objects.get(pk=item_id)
     item.item = request.POST.get('item')
-    item.date = request.POST.get('date')
     item.category = request.POST.get('category')
     item.priority = request.POST.get('priority')
     item.save()

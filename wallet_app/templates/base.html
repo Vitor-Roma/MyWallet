@@ -85,6 +85,8 @@
         .small-box {
           border-radius: 15px;
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+          flex-grow: 1;
+          width: 100%;
         }
 
         .btn-custom-submit {
@@ -143,9 +145,8 @@
         }
 
         .nav-custom {
-            margin-left: 0px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border: rgba(255, 255, 255, 0.5);
+          background-color: transparent !important;
+          color: white !important;
         }
 
         section {
@@ -172,6 +173,21 @@
             color: #007bff;
         }
 
+        .custom-md-2 {
+          -ms-flex: 0 0 20%;
+          flex: 0 0 20%;
+          max-width: 20%;
+        }
+
+        .card-color {
+            background-color: MidnightBlue;
+            color: white;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
     </style>
 
 
@@ -183,10 +199,10 @@
         <!-- Left navbar links -->
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                <a class="nav-link text-white" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href='/' class="nav-link">Dashboard</a>
+                <a href='/' class="nav-link text-white"><b>Dashboard</b></a>
             </li>
         </ul>
     </nav>

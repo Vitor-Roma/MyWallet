@@ -7,13 +7,17 @@
                     {% csrf_token %}
                     <label>Descrição:</label>
                     <input type="text" class="form-control" name="item" placeholder="Descrição">
-                    <label>Data prevista:</label>
-                    <input type="date" class="form-control" name="date">
                     <label>Categoria:</label>
                     <select class="form-control" name="category">
                         <option value="" selected="">---------------</option>
                             {% for category in todo_list_categories %}
                             <option value="{{ category.0 }}">{{ category.1 }}</option>
+                            {% endfor %}
+                    </select>
+                    <label>Prioridade:</label>
+                    <select class="form-control" name="priority">
+                            {% for number in todo_list_priorities %}
+                                <option value="{{ number.0 }}">{{ number.0 }}</option>
                             {% endfor %}
                     </select>
                 </div>
@@ -34,8 +38,6 @@
                     {% csrf_token %}
                     <label>Descrição:</label>
                     <input type="text" class="form-control" name="item" placeholder="Descrição" value="{{  item.item }}">
-                    <label>Data prevista:</label>
-                    <input type="date" class="form-control" name="date" value="{{ item.date | date:'Y-m-d' }}">
                     <label>Categoria:</label>
                     <select class="form-control" name="category">
                             {% for category in todo_list_categories %}
@@ -44,8 +46,14 @@
                                 </option>
                             {% endfor %}
                     </select>
-                    <label>Prioridade</label>
-                    <input type="number" class="form-control" name="priority" placeholder="1">
+                    <label>Prioridade:</label>
+                    <select class="form-control" name="priority">
+                            {% for number in todo_list_priorities %}
+                                <option {% if number.0 == item.priority %} selected="selected" {% endif %}
+                                                value="{{ number.0 }}">{{ number.0 }}
+                                </option>
+                            {% endfor %}
+                    </select>
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="submit" class="btn hike-color">Salvar</button>

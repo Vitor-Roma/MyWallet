@@ -178,13 +178,12 @@ class BuyingList(models.Model):
 
 class ToDoList(models.Model):
     item = models.CharField('Item', max_length=150, blank=False, null=False)
-    date = models.DateField('Data', null=True, blank=True)
     priority = models.IntegerField('Nível de prioridade', null=False, blank=False, default=1, choices=[
-        ('1', 1),
-        ('2', 2),
-        ('3', 3),
-        ('4', 4),
-        ('5', 5),
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
     ])
     category = models.CharField('Categoria', max_length=150, blank=False, null=False, choices=[
         ('work', 'Trabalho'),
