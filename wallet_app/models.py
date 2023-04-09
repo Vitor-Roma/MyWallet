@@ -1,6 +1,14 @@
 from django.db import models
 
 
+class NetWorth(models.Model):
+    date = models.DateField('Data de Referência', blank=False, null=False)
+    total = models.DecimalField('Total', blank=False, null=False, max_digits=100, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.date} | R${self.total}'
+
+
 class Account(models.Model):
     name = models.CharField('Nome', max_length=100, unique=True, null=False, blank=False)
     type = models.CharField('Tipo de conta', max_length=50, choices=[
@@ -63,9 +71,16 @@ class Saving(BaseTransaction):
     category = models.CharField('Categoria', max_length=50, unique=False, choices=[
         ('deposit', "Depósito"),
         ('revenue', 'Rendimentos'),
-        ('loss', 'Retirada'),
+        ('withdrawl', 'Retirada'),
         ('Other', 'Outro')
     ])
+
+    def get_category_choice(category):
+        for choice in Saving.category.field.choices:
+            if category == choice[0]:
+                return choice[1]
+            if category == choice[1]:
+                return choice[0]
 
     def __str__(self):
         return f'{self.date} {self.category} {self.amount}'
@@ -85,6 +100,16 @@ class FixedInvestment(BaseTransaction):
     ])
     obs = models.CharField('Observações', max_length=500, blank=True, null=True)
     link = models.CharField('Link', max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.category} - {self.profit}'
+
+    def get_category_choice(category):
+        for choice in FixedInvestment.category.field.choices:
+            if category == choice[0]:
+                return choice[1]
+            if category == choice[1]:
+                return choice[0]
 
     @property
     def profit(self):

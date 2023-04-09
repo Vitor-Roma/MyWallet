@@ -6,14 +6,14 @@
                     <p class="login-box-msg">Adicionar item a lista de coisas a fazer</p>
                     {% csrf_token %}
                     <label>Descrição:</label>
-                    <input type="text" class="form-control" name="item" placeholder="Descrição">
+                    <input type="text" class="form-control" name="description" placeholder="Descrição">
                     <label>Preço Mínimo:</label>
-                    <input type="number" class="form-control" name="min_price" placeholder="0">
+                    <input class="form-control input-money" name="min_price" placeholder="0">
                     <label>Preço Máximo:</label>
-                    <input type="number" class="form-control" name="max_price" placeholder="0">
+                    <input class="form-control input-money" name="max_price" placeholder="0">
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="submit" class="btn hike-color">Salvar</button>
+                    <button type="submit" class="btn button-color">Salvar</button>
                     <a class="btn btn-danger" data-dismiss="modal">Cancelar</a>
                 </div>
             </div>
@@ -30,12 +30,12 @@
                     <label>Descrição:</label>
                     <input type="text" class="form-control" name="description" placeholder="Descrição" value="{{  item.description }}">
                     <label>Preço Mínimo:</label>
-                    <input type="number" class="form-control" name="min_price" value="{{ item.min_price }}">
+                    <input class="form-control input-money" name="min_price" value="{{ item.min_price }}">
                     <label>Preço Máximo:</label>
-                    <input type="number" class="form-control" name="max_price" value="{{ item.max_price }}">
+                    <input class="form-control input-money" name="max_price" value="{{ item.max_price }}">
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="submit" class="btn hike-color">Salvar</button>
+                    <button type="submit" class="btn button-color">Salvar</button>
                     <a class="btn btn-danger" data-dismiss="modal">Cancelar</a>
                 </div>
             </div>

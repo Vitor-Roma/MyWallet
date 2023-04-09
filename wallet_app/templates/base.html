@@ -12,10 +12,10 @@
           href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- icheck bootstrap -->
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css">
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap-grid.min.css">
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.css">
     <!-- Toastr -->
@@ -89,22 +89,6 @@
           width: 100%;
         }
 
-        .btn-custom-submit {
-          background-color: #9E9E9E;
-          height: 50px;
-          border: none;
-          color: white;
-          text-align: center;
-          display: inline-block;
-          transition-duration: 0.4s;
-          cursor: pointer;
-        }
-
-        .btn-custom-submit:hover {
-          background-color: #757575;
-          color: white;
-        }
-
         .btn-edit {
             color: #2196F3;
             transition: all 0.2s ease-in-out;
@@ -145,16 +129,16 @@
         }
 
         .nav-custom {
-          background-color: transparent !important;
+          background-image: url("https://wallpaper.dog/large/20496552.jpg");
           color: white !important;
         }
 
         section {
-            background: linear-gradient(to bottom right, #000000, #000000, #000000, #000000, #031cfc, #000000, #000000, #000000, #000000);
-        }
-
-        body {
-            background: linear-gradient(to bottom right, #000000, #000000, #031cfc, #000000, #000000);
+            background-image: url("{% static 'background-image.jpg' %}");
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 100%;
+            position: relative;
         }
 
         .custom-small-box {
@@ -188,6 +172,16 @@
             font-weight: bold;
         }
 
+        .button-color {
+            background-color: midnightblue;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
     </style>
 
 
@@ -203,6 +197,12 @@
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href='/' class="nav-link text-white"><b>Dashboard</b></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href='' class="nav-link text-white"><b>Acompanhamento</b></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href='' class="nav-link text-white"><b>Calculos</b></a>
             </li>
         </ul>
     </nav>
@@ -225,4 +225,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"></script>
 <!--ChartJs-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.js"></script>
+<script>
+    $(document).ready(function(){
+        $(".input-money").inputmask('decimal', {
+            'alias': 'numeric',
+            'groupSeparator': '.',
+            'radixPoint': ",",
+            'digits': 2,
+            'digitsOptional': false,
+            'allowMinus': true,
+            'prefix': 'R$ ',
+            'rightAlign': false,
+            'unmaskAsNumber': true,
+            'removeMaskOnSubmit': true,
+        });
+    });
+</script>
 {% block scripts %}{% endblock %}

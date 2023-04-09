@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load money %}
+{% load dict %}
 {% block title %} {{ account.name }} {% endblock %}
 {% block breadcrumb %} {{account.name}}{% endblock %}
 {% block content %}
@@ -109,7 +110,10 @@
                                         {{ transaction.name}}
                                     </p>
                                 </td>
-                                <td>{{ transaction.get_category_display }}</td>
+                                <td>
+                                    <i class="{{ icons | dict_key:transaction.get_category_display }}"></i>
+                                    <p>{{ transaction.get_category_display }}</p>
+                                </td>
                                 <td class="value-tag">
                                     {% if transaction.get_category_display == 'Recebimentos' %}
                                     <span class="badge bg-success">{{ transaction.amount | currency }}</span>
@@ -174,9 +178,11 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <p>
-                                        <button class="btn btn-custom-submit">Filtrar</button>
-                                    </p>
+                                    <div class="col-md-3">
+                                        <p style="margin-top: 23px">
+                                            <button class="btn btn-default">Filtrar</button>
+                                        </p>
+                                    </div>
                                 </div>
                             </form>
                         </div>

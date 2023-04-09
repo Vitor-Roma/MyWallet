@@ -3,9 +3,10 @@ import pandas as pd
 from pprint import pprint
 from django.shortcuts import get_object_or_404
 from decimal import Decimal
-from wallet_app.models import Account, Saving, MonthlyExpense, Share, VariableInvestment, FixedInvestment
+from wallet_app.models import Account, Saving, MonthlyExpense, Share, VariableInvestment, FixedInvestment, NetWorth
 import boto3
 from botocore.exceptions import ClientError
+from datetime import date
 
 
 def cc_to_database(datapath, account_name):
@@ -55,6 +56,7 @@ def reserva_to_database(datapath, account_name):
         else:
             category = json_data[i]['Movimentação']
 
+        category = Saving.get_category_choice(category)
         amount = 0 if pd.isnull(json_data[i]['Valor']) else json_data[i]['Valor']
         amount = round(Decimal(amount), 2)
         pandas_dict = {
@@ -120,6 +122,7 @@ def fixed_to_database(datapath, account_name):
         projected_value = 0 if pd.isnull(json_data[i]['Valor Projetado']) else json_data[i]['Valor Projetado']
         profitability = 0 if pd.isnull(json_data[i]['Rentabilidade']) else json_data[i]['Rentabilidade']
         category = None if pd.isnull(json_data[i]['Categoria']) else json_data[i]['Categoria']
+        category = FixedInvestment.get_category_choice(category)
         pandas_dict = {
             'account_id': account.id,
             'due_date': due_date,
@@ -143,7 +146,17 @@ def upload_excel(file_path):
     s3_client = boto3.client('s3')
     try:
         response = s3_client.upload_file(file_path, os.environ.get('AWS_BUCKET_NAME'), 'Tabela_Planilha')
-        print('Planilha atualizada com sucesso!')
+        pprint('Planilha atualizada com sucesso!')
     except ClientError as e:
         return False
     return True
+
+
+def create_networth_control():
+    networth = sum([account.balance for account in Account.objects.all()])
+    today = date.today()
+    try:
+        NetWorth.objects.get(date=today, total=networth)
+    except:
+        NetWorth.objects.create(date=today, total=networth)
+        pprint('Patrimônio de hoje atualizado com sucesso')

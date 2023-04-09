@@ -1,8 +1,6 @@
+from _decimal import Decimal
 from datetime import date
-import json
-import os
 import pandas as pd
-from django.db import transaction
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
@@ -11,10 +9,11 @@ from dateutil.utils import today
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.urls import reverse
-
 from wallet_app.models import Account, FixedInvestment, Saving, Share, VariableInvestment, MonthlyExpense, Indexes, \
     BuyingList, IncomeDistribution, ToDoList
 from random import randint
+
+from wallet_app.utils.global_functions import category_color_dict, category_icon_dict
 
 
 @login_required
@@ -27,7 +26,6 @@ def home(request):
     todo_list = ToDoList.objects.all().order_by('-priority', '-pk')
     todo_list_categories = ToDoList.category.field.choices
     todo_list_priorities = ToDoList.priority.field.choices
-    _today = date.today()
     data = {
         'accounts': accounts,
         'total_value': total_value,
@@ -37,7 +35,7 @@ def home(request):
         'todo_list': todo_list,
         'todo_list_categories': todo_list_categories,
         'todo_list_priorities': todo_list_priorities,
-        'today': _today,
+        'today': date.today(),
     }
     return render(request, 'home.html', data)
 
@@ -91,7 +89,8 @@ def account_panel(request, account_id):
                 _category = MonthlyExpense.get_category_choice(category)
                 pie_chart_labels.append(_category)
                 pie_chart_data.append(_sum)
-                pie_chart_color.append(f'rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})')
+                pie_chart_color.append(category_color_dict(_category))
+        icons = category_icon_dict()
 
         data = {
             'account': account,
@@ -107,6 +106,7 @@ def account_panel(request, account_id):
             'pie_chart_color': pie_chart_color,
             'buying_account': buying_account,
             'buying_list': buying_list,
+            'icons': icons,
         }
         return render(request, 'checking_account_panel.html', data)
 
@@ -152,30 +152,20 @@ def account_panel(request, account_id):
 
 @login_required
 def add_buying_list(request, account_id):
-    description = request.GET.get('item_description')
-    min_price = request.GET.get('item_min_price')
-    max_price = request.GET.get('item_max_price')
-    qty = request.GET.get('quantity')
-    try:
-        with transaction.atomic():
-            for x in qty:
-                BuyingList.objects.create(description=description, min_price=min_price, max_price=max_price)
-    except:
-        pass
+    description = request.POST.get('description')
+    min_price = request.POST.get('min_price')
+    max_price = request.POST.get('max_price')
+    BuyingList.objects.create(description=description, min_price=min_price, max_price=max_price)
     return redirect(reverse('account_panel', kwargs={'account_id': account_id}))
 
 
 @login_required
 def edit_buying_list(request, account_id, item_id):
     item = get_object_or_404(BuyingList, pk=item_id)
-    try:
-        with transaction.atomic():
-            item.description = request.GET.get('item_description')
-            item.min_price = request.GET.get('item_min_price')
-            item.max_price = request.GET.get('item_max_price')
-            item.save()
-    except:
-        pass
+    item.description = request.POST.get('description')
+    item.min_price = Decimal(request.POST.get('min_price'))
+    item.max_price = Decimal(request.POST.get('max_price'))
+    item.save()
     return redirect(reverse('account_panel', kwargs={'account_id': account_id}))
 
 
