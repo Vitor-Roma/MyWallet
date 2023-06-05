@@ -156,17 +156,17 @@
                         <div class="form-group form-inline">
                             <form method="GET">
                                 <div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label style="margin-left: 25px; display: inline-block;">Início:</label>
                                         <input class="form-control" name="start_date" type="date"
                                                value="{{ start_date }}" style="width: 150px;  margin-left: 25px;">
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label style="margin-left: 25px; display: inline-block">Fim:</label>
                                         <input class="form-control" name="end_date" type="date" value="{{ end_date }}"
                                                style="width: 150px; margin-left: 25px;">
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label style="margin-left: 25px; display: inline-block">Categoria:</label>
                                         <select class="form-control" style="width: 150px;  margin-left: 25px;"
                                                 name="category">
@@ -178,8 +178,12 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <div class="col-md-3">
-                                        <p style="margin-top: 23px">
+                                    <div class="col-md-2">
+                                        <label style="margin-left: 25px; display: inline-block">Descrição:</label>
+                                        <input class="form-control" name="text_search" type="text" value="{{ text_search }}" style="width: 150px; margin-left: 25px;">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <p style="margin-top: 23px; margin-left: 25px">
                                             <button class="btn btn-default">Filtrar</button>
                                         </p>
                                     </div>
@@ -235,19 +239,17 @@
     var itemData = []
     var itemData2 = []
     var itemData3 = []
-    var itemData4 = []
     var backgroundColor = []
     {% for month in monthly_control %}
         labels.push('{{ month.date |date:"m/Y" }}')
         itemData.push(parseFloat('{{ month.total_expense }}'))
         itemData2.push(parseFloat('{{ month.total_revenue }}'))
-        itemData3.push(parseFloat('{{ month.goal }}'))
     {% endfor %}
     {% for label in pie_chart_labels %}
         labels2.push('{{label}}')
     {% endfor%}
     {% for data in pie_chart_data %}
-        itemData4.push(parseFloat('{{ data }}'))
+        itemData3.push(parseFloat('{{ data }}'))
     {% endfor %}
     {% for color in pie_chart_color %}
         backgroundColor.push('{{ color }}')
@@ -264,13 +266,6 @@
                 tension: 0.1
             },
             {
-                label: "Teto de despesas",
-                data: itemData3,
-                fill: false,
-                backgroundColor: 'blue',
-                tension: 0.1
-            },
-            {
                 label: "Receitas",
                 data: itemData2,
                 fill: false,
@@ -284,7 +279,7 @@
         labels: labels2,
         datasets: [{
             label: labels2,
-            data: itemData4,
+            data: itemData3,
             backgroundColor: backgroundColor
         }]
     };

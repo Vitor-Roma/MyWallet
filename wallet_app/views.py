@@ -46,13 +46,16 @@ def account_panel(request, account_id):
     if account.type == 'checking_account':
         buying_account = Account.objects.get(name='Compras')
         buying_list = BuyingList.objects.all()
-        start_date = request.GET.get('start_date', (date.today().replace(day=1) - relativedelta(months=6)).strftime("%Y-%m-%d"))
+        start_date = request.GET.get('start_date', (date.today().replace(day=1) - relativedelta(months=5)).strftime("%Y-%m-%d"))
         end_date = request.GET.get('end_date', (date.today().replace(day=1) + relativedelta(months=1) - relativedelta(days=1)).strftime("%Y-%m-%d"))
         category_filter = request.GET.get('category', None)
+        text_search = request.GET.get('text_search', '')
         actual_balance = sum([x.amount for x in account.wallet_app_monthlyexpense_related.all() if x.paid_date <= today().date()])
         account_transactions = MonthlyExpense.objects.filter(Q(account_id=account_id, paid_date__gte=start_date, paid_date__lte=end_date)).order_by('-paid_date', '-pk')
         if category_filter:
             account_transactions = account_transactions.filter(category=MonthlyExpense.get_category_choice(category_filter))
+        if text_search:
+            account_transactions = account_transactions.filter(name__icontains=text_search)
         category_monthly_amount = account_transactions\
             .annotate(month=ExtractMonth('paid_date'), year=ExtractYear('paid_date'), q_category=F('category'))\
             .values('month', 'year', 'q_category')\
@@ -63,10 +66,8 @@ def account_panel(request, account_id):
         date_range = pd.date_range(start_date, end_date, freq='MS').date
 
         monthly_control = []
-        salary = IncomeDistribution.objects.get(distribution='Despesas Mensais')
         for current_date in date_range:
-            goal = salary.amount if not category_filter else 0
-            current_month_control = {'date': current_date, 'expense_list': [], 'receipt_list': [], 'goal': goal}
+            current_month_control = {'date': current_date, 'expense_list': [], 'receipt_list': []}
             for category in category_monthly_amount:
                 q_category = MonthlyExpense.get_category_choice(category['q_category'])
                 if category['month'] == current_date.month and category['year'] == current_date.year:
@@ -107,6 +108,7 @@ def account_panel(request, account_id):
             'buying_account': buying_account,
             'buying_list': buying_list,
             'icons': icons,
+            'text_search': text_search,
         }
         return render(request, 'checking_account_panel.html', data)
 

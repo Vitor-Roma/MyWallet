@@ -31,13 +31,13 @@
                             {% for transaction in account_transactions %}
                             <tr>
                                 <td>{{ transaction.paid_date | date:"d/m/Y" }}</td></td>
-                                <td>{{ transaction.category }}</td>
+                                <td>{{ transaction.get_category_display }}</td>
                                 <td class="value-tag">
-                                {% if transaction.category == 'Resgate' %}
+                                {% if transaction.category == 'withdrawl' %}
                                     <span class="badge bg-danger">{{ transaction.amount | currency }}</span>
-                                {% elif transaction.category == 'Rendimentos' %}
+                                {% elif transaction.category == 'revenue' %}
                                     <span class="badge bg-warning">{{ transaction.amount | currency }}</span>
-                                {% elif transaction.category == 'Depósito' %}
+                                {% elif transaction.category == 'deposit' %}
                                     <span class="badge bg-success">{{ transaction.amount | currency }}</span>
                                 {% else %}
                                     <span class="badge bg-info">{{ transaction.amount | currency }}</span>

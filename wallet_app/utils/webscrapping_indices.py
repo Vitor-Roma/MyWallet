@@ -76,3 +76,33 @@ def get_CDI_and_Selic():
         index.save()
     except:
         print(f'Erro ao atualizar o valor do índice: {index.name}')
+
+
+def get_BITCOIN_and_ETHEREUM():
+    driver.get('https://www.binance.com/pt-BR/price/bitcoin')
+    usd_bitcoin = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, 'css-12ujz79'))).text[2:].replace(',', '')
+    usd_bitcoin = Decimal(usd_bitcoin)
+    dollar = Indexes.objects.get(name="Dolar")
+    brl_bitcoin = round(usd_bitcoin * dollar.value, 2)
+    try:
+        index = Indexes.objects.get(name='Bitcoin')
+        index.value = brl_bitcoin
+        index.save()
+    except Indexes.DoesNotExist:
+        index = Indexes.objects.create(name='Bitcoin', value=brl_bitcoin)
+    except:
+        print(f'Erro ao atualizar o valor do índice: {index.name}')
+
+    driver.get('https://www.binance.com/pt-BR/price/ethereum')
+    usd_ethereum = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CLASS_NAME, 'css-12ujz79'))).text[2:].replace(',', '')
+    usd_ethereum = Decimal(usd_ethereum)
+    dollar = Indexes.objects.get(name="Dolar")
+    brl_ethereum = round(usd_ethereum * dollar.value, 2)
+    try:
+        index = Indexes.objects.get(name='Ethereum')
+        index.value = brl_ethereum
+        index.save()
+    except Indexes.DoesNotExist:
+        index = Indexes.objects.create(name='Ethereum', value=brl_ethereum)
+    except:
+        print(f'Erro ao atualizar o valor do índice: {index.name}')

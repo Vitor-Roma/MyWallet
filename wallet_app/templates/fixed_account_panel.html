@@ -34,7 +34,7 @@
                             <tr>
                                 <td>{{ transaction.paid_date | date:"d/m/Y" }}</td>
                                 <td>{{ transaction.profit }}</td>
-                                <td>{{ transaction.category }}</td>
+                                <td>{{ transaction.get_category_display }}</td>
                                 <td>
                                 {% if transaction.amount < 0 %}
                                 <span class="badge bg-danger" style="font-size: 10px">{{ transaction.amount | currency }}</span>

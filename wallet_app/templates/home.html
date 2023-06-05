@@ -15,7 +15,16 @@
             </div>
             <div class="col-lg-12 col-5">
                 <marquee behavior="alternate" direction="right" scrollamount="3" style="border:BLACK 2px SOLID; background-color: MidnightBlue ; color: white">
-                    <b>{% for index in indexes %} | {{ index }} | {% endfor %}</b>
+                    |
+                    {% for index in indexes %}
+                        {% if index.is_percent %}
+                            <b>{{ index }} </b>
+                            {% else %}
+                            <b>{{ index.name }} - </b>
+                            <b class="input-money">{{ index.value }} </b>
+                        {% endif %}
+                    |
+                    {% endfor %}
                 </marquee>
             </div>
             <br>
