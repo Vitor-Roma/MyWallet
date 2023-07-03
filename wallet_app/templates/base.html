@@ -129,12 +129,12 @@
         }
 
         .nav-custom {
-          background-image: url("https://wallpaper.dog/large/20496552.jpg");
+          background-image: url("https://bucket-irating.s3.amazonaws.com/20496552.jpg");
           color: white !important;
         }
 
         section {
-            background-image: url("{% static 'background-image.jpg' %}");
+            background-image: url("https://bucket-irating.s3.amazonaws.com/20496552.jpg");
             background-repeat: no-repeat;
             background-size: cover;
             height: 100%;
@@ -197,6 +197,9 @@
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href='/' class="nav-link text-white"><b>Dashboard</b></a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href='{% url "historyboard" %}' class="nav-link text-white"><b>Histórico</b></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href='' class="nav-link text-white"><b>Acompanhamento</b></a>

@@ -1,4 +1,5 @@
-all:
+run_build:
+	docker-compose down
 	docker-compose up --build
 up:
 	docker-compose down
@@ -34,4 +35,8 @@ excel:
 shares:
 	docker exec -it my_wallet python3 manage.py share_values
 index:
+	docker exec -it my_wallet python3 manage.py index_values
+all:
+	docker exec -it my_wallet python3 manage.py excel_pandas
+	docker exec -it my_wallet python3 manage.py share_values
 	docker exec -it my_wallet python3 manage.py index_values

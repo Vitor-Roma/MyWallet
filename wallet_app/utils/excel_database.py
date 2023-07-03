@@ -33,7 +33,7 @@ def cc_to_database(datapath, account_name):
         }
         try:
             me = MonthlyExpense.objects.get(name=name, category=category, paid_date=date, amount=amount)
-        except:
+        except MonthlyExpense.DoesNotExist:
             me = MonthlyExpense(**pandas_dict)
             me.save()
             pprint(f'object saved successfully: {pandas_dict}')
@@ -68,7 +68,7 @@ def reserva_to_database(datapath, account_name):
         }
         try:
             me = Saving.objects.get(category=category, paid_date=date, amount=pandas_dict['amount'])
-        except:
+        except Saving.DoesNotExist:
             me = Saving(**pandas_dict)
             me.save()
             pprint(f'object saved successfully: {pandas_dict}')
@@ -104,7 +104,7 @@ def variable_to_database(datapath, account_name):
         try:
             me = VariableInvestment.objects.get(share_id=share_id, paid_date=date, amount=pandas_dict['amount'],
                                                 number_of_shares=quantity)
-        except:
+        except VariableInvestment.DoesNotExist:
             me = VariableInvestment(**pandas_dict)
             me.save()
             pprint(f'object saved successfully: {pandas_dict}')
@@ -136,7 +136,7 @@ def fixed_to_database(datapath, account_name):
             me = FixedInvestment.objects.get(account_id=account.id, paid_date=date, due_date=due_date,
                                              amount=pandas_dict['amount'],
                                              category=category, profitability=profitability)
-        except:
+        except FixedInvestment.DoesNotExist:
             me = FixedInvestment(**pandas_dict)
             me.save()
             pprint(f'object saved successfully: {pandas_dict}')
@@ -156,7 +156,9 @@ def create_networth_control():
     networth = sum([account.balance for account in Account.objects.all()])
     today = date.today()
     try:
-        NetWorth.objects.get(date=today, total=networth)
-    except:
+        net_worth = NetWorth.objects.get(date=today)
+        net_worth.networth = networth
+        net_worth.save()
+    except NetWorth.DoesNotExist:
         NetWorth.objects.create(date=today, total=networth)
-        pprint('Patrimônio de hoje atualizado com sucesso')
+    pprint('Patrimônio de hoje atualizado com sucesso')

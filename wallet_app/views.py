@@ -10,9 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.urls import reverse
 from wallet_app.models import Account, FixedInvestment, Saving, Share, VariableInvestment, MonthlyExpense, Indexes, \
-    BuyingList, IncomeDistribution, ToDoList
-from random import randint
-
+    BuyingList, IncomeDistribution, ToDoList, NetWorth
 from wallet_app.utils.global_functions import category_color_dict, category_icon_dict
 
 
@@ -26,6 +24,7 @@ def home(request):
     todo_list = ToDoList.objects.all().order_by('-priority', '-pk')
     todo_list_categories = ToDoList.category.field.choices
     todo_list_priorities = ToDoList.priority.field.choices
+    last_change = NetWorth.objects.last().date
     data = {
         'accounts': accounts,
         'total_value': total_value,
@@ -36,6 +35,7 @@ def home(request):
         'todo_list_categories': todo_list_categories,
         'todo_list_priorities': todo_list_priorities,
         'today': date.today(),
+        'last_change': last_change,
     }
     return render(request, 'home.html', data)
 
@@ -202,3 +202,13 @@ def edit_todo_list(request, item_id):
     item.priority = request.POST.get('priority')
     item.save()
     return redirect(reverse('home'))
+
+
+@login_required
+def historyboard(request):
+    net_worth = NetWorth.objects.all()
+
+    data = {
+        'net_worth': net_worth
+    }
+    return render(request, 'historyboard.html', data)

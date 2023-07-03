@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load money %}
+{% load dict %}
+{% block title %} Histórico de preços {% endblock %}
+{% block breadcrumb %} Histórico de preços {% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                {% include 'graphics/networth-graphic-include.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    const labels = []
+    const itemData = []
+    {% for item in net_worth %}
+        labels.push("{{ item.date|date:"d/m/y" }}")
+        itemData.push(parseFloat("{{ item.total }}"))
+    {% endfor %}
+    const data = {
+        labels: labels,
+        datasets: [
+        {
+            label: 'Patrimônio Total',
+            data: itemData,
+            borderColor: 'red',
+            fill: false,
+            pointRadius: 7,
+        }
+        ]
+    };
+    const config = {
+      type: 'line',
+      data: data,
+      options: {
+        plugins: {
+          filler: {
+            propagate: false,
+          },
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        interaction: {
+          intersect: false,
+        }
+      },
+    };
+
+    new Chart(document.getElementById('netWorth'), config)
+});
+
+</script>
+{% endblock %}
