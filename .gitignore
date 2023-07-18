@@ -131,4 +131,4 @@ dmypy.json
 # Ideia
 .idea
 
-.xlm
+*.xlm
