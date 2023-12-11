@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load money %}
+{% load dict %}
+{% block title %} Dashboard {% endblock %}
+{% block content %}
+<style>
+
+</style>
+<section>
+    <div class="content">
+        <div class="container-fluid">
+            <div class="col-mb-2">
+                <h1 style="padding: 20px; text-align: center; color: white"><b>Patrimônio
+                    Total: {{ total_value | currency }}</b></h1>
+                <p style="margin-bottom: 20px; text-align: center; color: white">Ultima atualização: {{ last_change }}</p>
+            </div>
+            <div class="col-lg-12 col-5">
+                <marquee behavior="alternate" direction="right" scrollamount="3" style="border:BLACK 2px SOLID; background-color: MidnightBlue ; color: white">
+                    |
+                    {% for index in indexes %}
+                        {% if index.is_percent %}
+                            <b>{{ index }} </b>
+                            {% else %}
+                            <b>{{ index.name }} - </b>
+                            <b class="input-money">{{ index.value }} </b>
+                        {% endif %}
+                    |
+                    {% endfor %}
+                </marquee>
+            </div>
+            <br>
+            <div class="row d-flex align-items-start">
+                <div class="col-md-10 d-flex flex-wrap" style="padding-bottom: 15px">
+                    {% for account in accounts %}
+                    <div class="col-md-2 custom-md-2">
+                        <div class="small-box" style="background-color: {{ account.color }}; color: white">
+                            <div class="inner" style="text-align: center">
+                                <h5><i class="fas fa-tag" style="margin-right: 10px"></i>{{ account }}</h5>
+                                <h6><b>{{ account.balance | currency }}</b></h6>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-bag"></i>
+                            </div>
+                            <a href="/account/{{account.id}}/" class="small-box-footer">Detalhes <i
+                                    class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-2 justify-content-end">
+                    <div class="small-box" style="background-color: black ; color: white">
+                        <div class="inner" style="text-align: center">
+                            <h5><i class="fas fa-tag" style="margin-right: 10px"></i>Salário</h5>
+                            {% for income in salary %}
+                            <h6><b>{{ income.distribution }}: {{ income.amount | currency}}</b></h6>
+                            {% endfor %}
+                            <h6><b>Total : {{ total_salary | currency }}</b></h6>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-bag"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-12" style="margin-top: 15px">
+                <div class="col-md-4 connectedSortable">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-header card-color">
+                                <h3 class="card-title bold" style="text-align: center">Patrimônio por conta</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chartjs-size-monitor">
+                                    <div class="chartjs-size-monitor-expand">
+                                        <div class=""></div>
+                                    </div>
+                                    <div class="chartjs-size-monitor-shrink">
+                                        <div class=""></div>
+                                    </div>
+                                </div>
+                                <canvas id="myChart"
+                                        style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 736px;"
+                                        class="chartjs-render-monitor" width="736" height="250">
+                                </canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 connectedSortable">
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-header card-color">
+                                <h3 class="card-title bold" style="text-align: center">Patrimônio por Objetivo</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chartjs-size-monitor">
+                                    <div class="chartjs-size-monitor-expand">
+                                        <div class=""></div>
+                                    </div>
+                                    <div class="chartjs-size-monitor-shrink">
+                                        <div class=""></div>
+                                    </div>
+                                </div>
+                                <canvas id="myChart2"
+                                        style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 736px;"
+                                        class="chartjs-render-monitor" width="736" height="250">
+                                </canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header card-color">
+                            <div class="card-tools">
+                                <div class="custom-small-box">
+                                    <a data-toggle="modal" data-target="#create-todo-list"
+                                       style="padding: 5px 10px; cursor: pointer">
+                                        + Adicionar novo item
+                                    </a>
+                                </div>
+                            </div>
+                            <h3 class="bold">Lista de coisas para fazer</h3>
+                        </div>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover">
+                                <tbody>
+                                {% for item in todo_list %}
+                                {% include 'todo-list-modals.html' %}
+                                <tr>
+                                    <td>{{ item.item }}</td>
+                                    <td>{{ item.date | date:"F" }}</td>
+                                    <td>{{ item.get_category_display }}</td>
+                                    <td>
+                                        <a data-toggle="modal" data-target="#edit-todo-list-{{ item.id }}"
+                                           style="cursor: pointer">
+                                            <i class="fas fa-edit btn-edit"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'delete_todo_list' item.id %}">
+                                            <i class="fas fa-trash btn-delete"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    var labels = []
+    var labels2 = []
+    var itemData = []
+    var itemData2 = []
+    var backGroundColor = []
+    var backGroundColor2 = []
+    {% for account in accounts %}
+    labels.push("{{ account.name }}")
+    if (labels2.includes("{{ account.description }}")){}
+    else {
+        labels2.push("{{ account.description }}")
+        backGroundColor2.push("{{ account.color }}")
+        itemData2.push(parseFloat("{{ account.type_balance }}"))
+    }
+    backGroundColor.push("{{ account.color }}")
+    itemData.push(parseFloat("{{ account.balance }}"))
+    {% endfor %}
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: labels,
+            data: itemData,
+            backgroundColor: backGroundColor,
+        }]
+        };
+    const data2 = {
+        labels: labels2,
+        datasets: [{
+            label: labels2,
+            data: itemData2,
+            backgroundColor: backGroundColor2,
+        }]
+        };
+    const config = {
+        type: 'pie',
+        data: data
+    }
+    const config2 = {
+        type: 'pie',
+        data: data2
+    }
+
+    new Chart(document.getElementById('myChart'), config)
+    new Chart(document.getElementById('myChart2'), config2)
+
+
+
+</script>
+{% endblock %}

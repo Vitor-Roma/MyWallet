@@ -1,4 +1,20 @@
 from django.db import models
+from django.utils.timezone import now
+from timescale.db.models.fields import TimescaleDateTimeField
+from timescale.db.models.managers import TimescaleManager
+
+
+class TimescaleModel(models.Model):
+    time = TimescaleDateTimeField(interval="1 day", default=now)
+    objects = TimescaleManager()
+
+    class Meta:
+        abstract = True
+
+
+class TimeScaleShare(TimescaleModel):
+    name = models.CharField('Nome', max_length=100, null=False, blank=False)
+    price = models.DecimalField('Preço', blank=False, null=False, max_digits=10, decimal_places=2)
 
 
 class NetWorth(models.Model):
